@@ -6,7 +6,5 @@ const { protect } = require('../middleware/authMiddleware');
 router.use(protect);
 
 router.get('/generate', generateRecipes);
-router.get('/favorites', getFavorites);
-router.post('/favorite', toggleFavorite);
 
 module.exports = router;
