@@ -46,6 +46,8 @@ app.use('/api/items', require('./routes/itemRoutes'));
 app.use('/api/recipes', require('./routes/recipeRoutes'));
 app.use('/api/subscription', require('./routes/subscriptionRoutes'));
 app.use('/api/favorites', require('./routes/favoritesRoutes'));
+console.log("🛠️  Registering Review Routes...");
+app.use('/api/reviews', require('./routes/reviewRoutes'));
 
 // Health check
 app.get('/api/health', (req, res) => {
