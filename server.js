@@ -18,7 +18,8 @@ app.use(cors({
         'http://localhost:5173',
         'http://localhost:8080',
         'http://localhost:3000',
-        'https://expirioo.netlify.app'
+        'https://expirioo.netlify.app',
+        'https://expirio-08f52c30-pwat5xgke-ghouse-pasha-s-projects.vercel.app'
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
