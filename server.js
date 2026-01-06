@@ -13,21 +13,30 @@ connectDB();
 const app = express();
 
 // Middleware
-app.use(cors({
-    origin: [
-        'http://localhost:5173',
-        'http://localhost:8080',
-        'http://localhost:3000',
-        'https://expirioo.netlify.app',
-        'https://expirio-08f52c30-pwat5xgke-ghouse-pasha-s-projects.vercel.app'
-    ],
+const allowedOrigins = [
+    'http://localhost:5173',
+    'https://expirio-08f52c30.vercel.app'
+];
+
+const corsOptions = {
+    origin: function (origin, callback) {
+        // allow requests with no origin (like mobile apps or curl requests)
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-}));
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+    optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
 
 // Handle preflight requests
-app.options('*', cors());
+app.options('*', cors(corsOptions));
 app.use(express.json());
 
 // Request logger
