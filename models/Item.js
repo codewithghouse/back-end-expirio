@@ -45,4 +45,7 @@ const itemSchema = new mongoose.Schema({
     }
 });
 
+// Indexing for faster dashboard and inventory queries
+itemSchema.index({ user: 1, expiryDate: 1 });
+
 module.exports = mongoose.model('Item', itemSchema);

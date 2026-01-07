@@ -31,7 +31,12 @@ module.exports = function (passport) {
 
     passport.use(new JwtStrategy(opts, async (jwt_payload, done) => {
         try {
-            const user = await User.findById(jwt_payload.id);
+            // OPTIMIZATION: Only fetch minimal fields needed for most routes
+            // Using lean() for faster read-only access
+            const user = await User.findById(jwt_payload.id)
+                .select('_id role name')
+                .lean();
+
             if (user) {
                 return done(null, user);
             }
@@ -41,3 +46,4 @@ module.exports = function (passport) {
         }
     }));
 };
+

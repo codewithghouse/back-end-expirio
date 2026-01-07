@@ -56,6 +56,7 @@ app.use('/api/items', require('./routes/itemRoutes'));
 app.use('/api/recipes', require('./routes/recipeRoutes'));
 app.use('/api/subscription', require('./routes/subscriptionRoutes'));
 app.use('/api/favorites', require('./routes/favoritesRoutes'));
+app.use('/api/dashboard', require('./routes/dashboardRoutes'));
 console.log("🛠️  Registering Review Routes...");
 app.use('/api/reviews', require('./routes/reviewRoutes'));
 
