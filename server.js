@@ -12,34 +12,42 @@ connectDB();
 
 const app = express();
 
-// Middleware
+// CORS Configuration - Optimized for Mobile & Cross-Environment
 const allowedOrigins = [
     'http://localhost:5173',
+    'http://localhost:3000',
     'http://localhost:8080',
-    'https://expirio-08f52c30.vercel.app'
-];
+    'http://127.0.0.1:5173',
+    'https://expirio-08f52c30.vercel.app',
+    process.env.CLIENT_URL,
+].filter(origin => origin); // Remove empty values
 
 const corsOptions = {
-    origin: function (origin, callback) {
-        // allow requests with no origin (like mobile apps or curl requests)
-        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+    origin: (origin, callback) => {
+        // 1. Allow non-browser requests (Postman, Mobile Apps, or same-origin)
+        if (!origin) return callback(null, true);
+
+        // 2. Check if the origin is in our whitelist
+        const isAllowed = allowedOrigins.includes(origin);
+
+        if (isAllowed) {
             callback(null, true);
         } else {
-            callback(new Error('Not allowed by CORS'));
+            console.error(`🛑 [CORS Blocked] Origin: ${origin}`);
+            callback(new Error('Cross-Origin Request Blocked by Expirio Security Policy'));
         }
     },
-    credentials: true, // Required for some mobile browsers to handle headers correctly
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
-    exposedHeaders: ['Authorization'], // Explicitly expose for mobile browsers
-    preflightContinue: false,
-    optionsSuccessStatus: 204 // 204 is often better for preflight legacy support
+    exposedHeaders: ['Authorization'],
+    credentials: true,
+    maxAge: 86400, // Cache preflight results for 24 hours
+    optionsSuccessStatus: 204
 };
 
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // Robust preflight handling
 
-// Handle preflight requests
-app.options('*', cors(corsOptions));
 
 app.use(express.json());
 

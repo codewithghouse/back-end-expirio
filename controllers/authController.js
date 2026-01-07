@@ -44,42 +44,56 @@ exports.register = async (req, res, next) => {
     }
 };
 
-// @desc    Authenticate a user & get token (Optimized for Mobile)
+// @desc    Authenticate a user & get token (Optimized with Auto-Signup)
 // @route   POST /api/auth/login
 // @access  Public
 exports.login = async (req, res, next) => {
-    const { email, password } = req.body;
+    const { email, password, name } = req.body;
+    console.log(`📡 [LOGIN] Attempt for email: ${email}`);
 
     try {
-        // 1. Fetch minimal fields needed for auth (Indexed email)
-        const user = await User.findOne({ email }).select('+password name role');
+        // 1. Fetch user (with password for verification)
+        let user = await User.findOne({ email }).select('+password name role');
 
         if (!user) {
-            return res.status(401).json({
-                success: false,
-                message: 'Invalid email or password'
+            console.log(`🔍 [LOGIN] User not found for ${email}. Creating new record (Auto-Signup)...`);
+            // Create user if doesn't exist (Safe for testing/dummy flows)
+            user = await User.create({
+                name: name || email.split('@')[0], // Fallback to email prefix
+                email,
+                password,
+                role: 'user'
             });
-        }
-
-        // 2. Fast credential check
-        const isMatch = await user.comparePassword(password);
-        if (!isMatch) {
-            return res.status(401).json({
-                success: false,
-                message: 'Invalid email or password'
-            });
+            console.log(`✅ [LOGIN] New user created successfully: ${user._id}`);
+        } else {
+            // 2. Fast credential check for existing user
+            console.log(`🔑 [LOGIN] User exists. Validating credentials...`);
+            const isMatch = await user.comparePassword(password);
+            if (!isMatch) {
+                console.warn(`⚠️ [LOGIN] Password mismatch for ${email}`);
+                return res.status(401).json({
+                    success: false,
+                    message: 'Invalid email or password'
+                });
+            }
+            console.log(`✅ [LOGIN] Password verified for ${user.email}`);
         }
 
         // 3. Return ONLY essential auth data (Fast response)
+        const token = generateToken(user._id, user.role);
+        console.log(`🎫 [LOGIN] Token generated for userId: ${user._id}`);
+
         res.json({
             success: true,
-            token: generateToken(user._id, user.role),
+            token,
             userId: user._id,
             name: user.name,
             role: user.role
         });
     } catch (error) {
+        console.error(`❌ [LOGIN ERROR] ${error.message}`);
         next(error);
     }
 };
+
 
