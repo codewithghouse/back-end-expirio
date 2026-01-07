@@ -7,12 +7,15 @@ const Favorite = require('../models/Favorite');
 // @access  Private
 exports.generateRecipes = async (req, res, next) => {
     try {
-        // 1. Get user items (not expired)
+        // 1. Get user items (not expired) - OPTIMIZED: only names for matching
         const now = new Date();
         const items = await Item.find({
             user: req.user.id,
             expiryDate: { $gt: now }
-        }).sort({ expiryDate: 1 });
+        })
+            .select('name')
+            .sort({ expiryDate: 1 })
+            .lean();
 
         if (items.length === 0) {
             return res.json({
@@ -21,6 +24,7 @@ exports.generateRecipes = async (req, res, next) => {
                 recipes: []
             });
         }
+
 
         const ingredientNames = items.map(i => i.name.toLowerCase());
 

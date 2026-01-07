@@ -6,12 +6,18 @@ const Batch = require('../models/Batch');
 // @access  Private
 exports.getItems = async (req, res, next) => {
     try {
-        const items = await Item.find({ user: req.user.id }).sort({ expiryDate: 1 });
+        // OPTIMIZATION: Use .lean() for performance and .select() for minimal payload
+        const items = await Item.find({ user: req.user.id })
+            .select('name category quantity unit expiryDate location notes')
+            .sort({ expiryDate: 1 })
+            .lean();
+
         res.json(items);
     } catch (error) {
         next(error);
     }
 };
+
 
 // @desc    Add new item
 // @route   POST /api/items

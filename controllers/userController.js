@@ -5,12 +5,17 @@ const User = require('../models/User');
 // @access  Private
 exports.getMe = async (req, res) => {
     try {
-        const user = await User.findById(req.user.id).select('-password');
+        // OPTIMIZATION: Use .lean() for faster read-only execution
+        const user = await User.findById(req.user.id)
+            .select('-password')
+            .lean();
+
         res.json(user);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
+
 
 // @desc    Get all users
 // @route   GET /api/users

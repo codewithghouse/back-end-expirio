@@ -15,6 +15,7 @@ const app = express();
 // Middleware
 const allowedOrigins = [
     'http://localhost:5173',
+    'http://localhost:8080',
     'https://expirio-08f52c30.vercel.app'
 ];
 
@@ -27,16 +28,19 @@ const corsOptions = {
             callback(new Error('Not allowed by CORS'));
         }
     },
-    credentials: true,
+    credentials: true, // Required for some mobile browsers to handle headers correctly
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
-    optionsSuccessStatus: 200
+    exposedHeaders: ['Authorization'], // Explicitly expose for mobile browsers
+    preflightContinue: false,
+    optionsSuccessStatus: 204 // 204 is often better for preflight legacy support
 };
 
 app.use(cors(corsOptions));
 
 // Handle preflight requests
 app.options('*', cors(corsOptions));
+
 app.use(express.json());
 
 // Request logger
