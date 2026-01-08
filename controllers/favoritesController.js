@@ -5,7 +5,8 @@ const Favorite = require('../models/Favorite');
 // @access  Private
 exports.getFavorites = async (req, res, next) => {
     try {
-        const favorites = await Favorite.find({ user: req.user.id }).sort({ createdAt: -1 });
+        const userId = req.user._id || req.user.id;
+        const favorites = await Favorite.find({ user: userId }).sort({ createdAt: -1 });
         res.status(200).json({
             success: true,
             count: favorites.length,
@@ -22,12 +23,13 @@ exports.getFavorites = async (req, res, next) => {
 exports.toggleFavorite = async (req, res, next) => {
     try {
         const { recipeId, recipeName, recipeImage } = req.body;
+        const userId = req.user._id || req.user.id;
 
         if (!recipeId) {
             return res.status(400).json({ success: false, message: 'Recipe ID is required' });
         }
 
-        const existing = await Favorite.findOne({ user: req.user.id, recipeId });
+        const existing = await Favorite.findOne({ user: userId, recipeId });
 
         if (existing) {
             await Favorite.findByIdAndDelete(existing._id);
@@ -38,7 +40,7 @@ exports.toggleFavorite = async (req, res, next) => {
             });
         } else {
             const newFavorite = await Favorite.create({
-                user: req.user.id,
+                user: userId,
                 recipeId,
                 recipeName,
                 recipeImage

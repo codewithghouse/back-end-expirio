@@ -20,9 +20,10 @@ exports.getReviews = async (req, res, next) => {
 // @route   GET /api/reviews/me
 // @access  Private
 exports.getMyReview = async (req, res, next) => {
-    console.log(`📡 [Controller] getMyReview called for user: ${req.user.id}`);
+    const userId = req.user._id || req.user.id;
+    console.log(`📡 [Controller] getMyReview called for user: ${userId}`);
     try {
-        const review = await Review.findOne({ user: req.user.id });
+        const review = await Review.findOne({ user: userId });
         console.log(`✅ [Controller] getMyReview status: ${review ? 'Found' : 'Not Found'}`);
         res.status(200).json(review);
     } catch (error) {
@@ -42,9 +43,14 @@ exports.createOrUpdateReview = async (req, res, next) => {
             return res.status(400).json({ success: false, message: 'Please provide rating and review text' });
         }
 
-        const user = await User.findById(req.user.id);
+        const userId = req.user._id || req.user.id;
+        const user = await User.findById(userId);
 
-        let review = await Review.findOne({ user: req.user.id });
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        let review = await Review.findOne({ user: userId });
 
         if (review) {
             // Update
@@ -57,7 +63,7 @@ exports.createOrUpdateReview = async (req, res, next) => {
 
         // Create
         review = new Review({
-            user: req.user.id,
+            user: userId,
             name: user.name,
             rating,
             reviewText

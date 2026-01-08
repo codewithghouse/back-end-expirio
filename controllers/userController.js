@@ -5,8 +5,9 @@ const User = require('../models/User');
 // @access  Private
 exports.getMe = async (req, res) => {
     try {
+        const userId = req.user._id || req.user.id;
         // OPTIMIZATION: Use .lean() for faster read-only execution
-        const user = await User.findById(req.user.id)
+        const user = await User.findById(userId)
             .select('-password')
             .lean();
 

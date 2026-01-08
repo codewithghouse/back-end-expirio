@@ -7,10 +7,11 @@ const Favorite = require('../models/Favorite');
 // @access  Private
 exports.generateRecipes = async (req, res, next) => {
     try {
+        const userId = req.user._id || req.user.id;
         // 1. Get user items (not expired) - OPTIMIZED: only names for matching
         const now = new Date();
         const items = await Item.find({
-            user: req.user.id,
+            user: userId,
             expiryDate: { $gt: now }
         })
             .select('name')

@@ -34,8 +34,7 @@ module.exports = function (passport) {
             // OPTIMIZATION: Only fetch minimal fields needed for most routes
             // Using lean() for faster read-only access
             const user = await User.findById(jwt_payload.id)
-                .select('_id role name')
-                .lean();
+                .select('_id role name');
 
             if (user) {
                 return done(null, user);
